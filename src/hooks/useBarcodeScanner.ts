@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import type { BarcodeResult, ScannerConfig } from '@/types/barcode';
-import { SCANNER_CONFIG } from '@/utils/constants';
+import type { BarcodeResult } from '@/types/barcode';
 import { isValidTrackingNumberFormat } from '@/utils/validation';
 
 interface UseBarcodeScanner {
@@ -15,16 +14,13 @@ interface UseBarcodeScanner {
 }
 
 export function useBarcodeScanner(
-  elementId: string,
-  config: Partial<ScannerConfig> = {}
+  elementId: string
 ): UseBarcodeScanner {
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState<BarcodeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const lastErrorTime = useRef<number | null>(null);
-
-  const mergedConfig = { ...SCANNER_CONFIG, ...config };
 
   const onScanSuccess = (decodedText: string, result: any) => {
     console.log('Scanned result:', decodedText);
@@ -78,26 +74,7 @@ export function useBarcodeScanner(
         return;
       }
 
-      // Test camera permissions first
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' } 
-        });
-        stream.getTracks().forEach(track => track.stop());
-        console.log('Camera permission granted');
-      } catch (permissionError: any) {
-        console.error('Camera permission error:', permissionError);
-        if (permissionError.name === 'NotAllowedError') {
-          setError('カメラの使用が拒否されました。ブラウザの設定でカメラの使用を許可してください。');
-        } else if (permissionError.name === 'NotFoundError') {
-          setError('カメラが見つかりません。デバイスにカメラが接続されているか確認してください。');
-        } else if (permissionError.name === 'NotSupportedError') {
-          setError('このブラウザではカメラアクセスがサポートされていません。');
-        } else {
-          setError(`カメラアクセスエラー: ${permissionError.message}`);
-        }
-        return;
-      }
+      console.log('Starting camera scanner...');
       
       if (scannerRef.current) {
         await scannerRef.current.clear();
@@ -106,40 +83,45 @@ export function useBarcodeScanner(
       const scanner = new Html5QrcodeScanner(
         elementId,
         {
-          fps: mergedConfig.fps,
-          qrbox: mergedConfig.qrbox,
-          aspectRatio: mergedConfig.aspectRatio,
-          disableFlip: mergedConfig.disableFlip,
-          videoConstraints: mergedConfig.videoConstraints,
+          fps: 10,
+          qrbox: 250,
+          aspectRatio: 1.0,
+          disableFlip: false,
           formatsToSupport: [
             Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.CODE_93,
-            Html5QrcodeSupportedFormats.CODABAR,
             Html5QrcodeSupportedFormats.EAN_13,
             Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.ITF,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.RSS_14,
-            Html5QrcodeSupportedFormats.RSS_EXPANDED,
-          ],
-          experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true
-          },
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true
+            Html5QrcodeSupportedFormats.CODE_39,
+          ]
         },
-        false
+        /* verbose= */ false
       );
 
       scannerRef.current = scanner;
-      scanner.render(onScanSuccess, onScanError);
-      setIsScanning(true);
       
-    } catch (err) {
+      // Add render with enhanced error handling
+      scanner.render(onScanSuccess, (errorMessage) => {
+        onScanError(errorMessage);
+        // Log detailed error for debugging
+        console.log('Scanner render error:', errorMessage);
+      });
+      
+      setIsScanning(true);
+      console.log('Scanner initialized successfully');
+      
+    } catch (err: any) {
+      console.error('Scanner initialization failed:', err);
       const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
-      setError(`カメラの起動に失敗しました: ${errorMessage}`);
+      
+      if (err.name === 'NotAllowedError') {
+        setError('カメラの使用が拒否されました。ブラウザの設定でカメラアクセスを許可してください。');
+      } else if (err.name === 'NotFoundError') {
+        setError('カメラが見つかりません。デバイスにカメラが接続されているか確認してください。');
+      } else if (err.message && err.message.includes('Permission')) {
+        setError('カメラの権限が必要です。ブラウザの設定を確認してください。');
+      } else {
+        setError(`カメラの起動に失敗しました: ${errorMessage}`);
+      }
       setIsScanning(false);
     }
   };

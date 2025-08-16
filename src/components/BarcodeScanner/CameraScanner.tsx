@@ -73,14 +73,26 @@ export function CameraScanner({ onResult, className = '' }: CameraScannerProps) 
       {/* Status Messages */}
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm font-medium">{error}</p>
+          <p className="text-red-800 text-sm font-medium mb-2">{error}</p>
+          <div className="text-red-700 text-xs">
+            <p><strong>解決手順:</strong></p>
+            <ol className="list-decimal list-inside mt-1 space-y-1">
+              <li>ブラウザのアドレスバーのカメラアイコンをクリック</li>
+              <li>カメラアクセスを「許可」に変更</li>
+              <li>ページを更新して再度お試しください</li>
+              <li>問題が続く場合は「ファイル」タブをお使いください</li>
+            </ol>
+          </div>
         </div>
       )}
 
-      {isScanning && (
+      {isScanning && !error && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-800 text-sm font-medium">
+          <p className="text-blue-800 text-sm font-medium mb-2">
             📷 バーコードをカメラに向けてください
+          </p>
+          <p className="text-blue-600 text-xs">
+            カメラが起動しない場合は、ブラウザのカメラ権限を確認してください
           </p>
         </div>
       )}
