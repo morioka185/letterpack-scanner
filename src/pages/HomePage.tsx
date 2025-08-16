@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CameraScanner } from '@/components/BarcodeScanner/CameraScanner';
 import { TrackingCard } from '@/components/TrackingResults/TrackingCard';
 import { validateLetterpackNumber } from '@/utils/validation';

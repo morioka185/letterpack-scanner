@@ -106,7 +106,7 @@ export function useBarcodeScanner(
     setError(null);
   };
 
-  const scanFromFile = async (file: File): Promise<void> => {
+  const scanFromFile = async (_file: File): Promise<void> => {
     try {
       setError(null);
       
