@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { CameraScanner } from '@/components/BarcodeScanner/CameraScanner';
+import { FileScanner } from '@/components/BarcodeScanner/FileScanner';
 import { TrackingCard } from '@/components/TrackingResults/TrackingCard';
 import { validateLetterpackNumber } from '@/utils/validation';
 import type { ValidationResult } from '@/types/tracking';
-import { FileText, Zap, Shield, Globe } from 'lucide-react';
+import { FileText, Zap, Shield, Globe, Camera, Upload } from 'lucide-react';
 
 export function HomePage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [scanMode, setScanMode] = useState<'camera' | 'file'>('camera');
 
   const handleScanResult = (scannedText: string) => {
     console.log('Received scan result:', scannedText);
@@ -100,7 +102,39 @@ export function HomePage() {
               </ul>
             </div>
 
-            <CameraScanner onResult={handleScanResult} />
+            {/* Scan Mode Toggle */}
+            <div className="mb-6">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setScanMode('camera')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium transition-colors ${
+                    scanMode === 'camera'
+                      ? 'bg-white text-letterpack-red shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Camera className="h-4 w-4" />
+                  カメラ
+                </button>
+                <button
+                  onClick={() => setScanMode('file')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium transition-colors ${
+                    scanMode === 'file'
+                      ? 'bg-white text-letterpack-red shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Upload className="h-4 w-4" />
+                  ファイル
+                </button>
+              </div>
+            </div>
+
+            {scanMode === 'camera' ? (
+              <CameraScanner onResult={handleScanResult} />
+            ) : (
+              <FileScanner onResult={handleScanResult} />
+            )}
           </div>
 
           {/* Results Section */}
@@ -143,6 +177,8 @@ export function HomePage() {
                 <li>• EAN_13 / EAN_8</li>
                 <li>• ITF（Interleaved 2 of 5）</li>
                 <li>• CODE_39 / CODABAR</li>
+                <li>• UPC_A / UPC_E</li>
+                <li>• RSS_14 / RSS_EXPANDED</li>
               </ul>
             </div>
             <div>
@@ -153,6 +189,33 @@ export function HomePage() {
                 <li>• レターパック形式判定</li>
                 <li>• 自動フォーマット変換</li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Troubleshooting Section */}
+        <div className="mt-8 bg-orange-50 border border-orange-200 rounded-xl p-6">
+          <h3 className="text-xl font-semibold text-orange-900 mb-4">
+            🔧 トラブルシューティング
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-orange-900 mb-2">カメラが起動しない場合</h4>
+              <ul className="text-sm text-orange-800 space-y-1">
+                <li>• ブラウザでカメラの使用許可を確認</li>
+                <li>• HTTPS接続を使用（GitHub Pagesは自動的にHTTPS）</li>
+                <li>• 他のアプリでカメラが使用されていないか確認</li>
+                <li>• ブラウザを再起動してみる</li>
+                <li>• カメラアクセスに問題がある場合は「ファイル」タブを使用</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-orange-900 mb-2">環境情報</h4>
+              <div className="text-sm text-orange-800 space-y-1">
+                <div>• セキュア接続: {window.location.protocol === 'https:' ? '✅ HTTPS' : '❌ HTTP'}</div>
+                <div>• カメラAPI: {navigator.mediaDevices ? '✅ 対応' : '❌ 非対応'}</div>
+                <div>• ブラウザ: {navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Safari') ? 'Safari' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'その他'}</div>
+              </div>
             </div>
           </div>
         </div>

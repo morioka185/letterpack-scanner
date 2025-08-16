@@ -66,6 +66,39 @@ export function useBarcodeScanner(
       setError(null);
       setResult(null);
       
+      // Check if we're in a secure context (HTTPS or localhost)
+      if (!window.isSecureContext) {
+        setError('カメラアクセスにはHTTPS接続が必要です。');
+        return;
+      }
+
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('このブラウザはカメラアクセスをサポートしていません。');
+        return;
+      }
+
+      // Test camera permissions first
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+        stream.getTracks().forEach(track => track.stop());
+        console.log('Camera permission granted');
+      } catch (permissionError: any) {
+        console.error('Camera permission error:', permissionError);
+        if (permissionError.name === 'NotAllowedError') {
+          setError('カメラの使用が拒否されました。ブラウザの設定でカメラの使用を許可してください。');
+        } else if (permissionError.name === 'NotFoundError') {
+          setError('カメラが見つかりません。デバイスにカメラが接続されているか確認してください。');
+        } else if (permissionError.name === 'NotSupportedError') {
+          setError('このブラウザではカメラアクセスがサポートされていません。');
+        } else {
+          setError(`カメラアクセスエラー: ${permissionError.message}`);
+        }
+        return;
+      }
+      
       if (scannerRef.current) {
         await scannerRef.current.clear();
       }
