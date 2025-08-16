@@ -82,9 +82,22 @@ export function HomePage() {
               <ol className="text-sm text-blue-800 space-y-1">
                 <li>1. 「スキャン開始」ボタンを押す</li>
                 <li>2. カメラの使用を許可する</li>
-                <li>3. レターパックのバーコードを画面に向ける</li>
-                <li>4. 自動的に追跡番号を読み取ります</li>
+                <li>3. レターパックのバーコードを画面の中央に配置</li>
+                <li>4. バーコードから10-30cm程度の距離を保つ</li>
+                <li>5. 明るい場所でスキャンする</li>
+                <li>6. 自動的に追跡番号を読み取ります</li>
               </ol>
+            </div>
+
+            {/* Tips */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-amber-900 mb-2">📝 スキャンのコツ</h4>
+              <ul className="text-sm text-amber-800 space-y-1">
+                <li>• バーコードが画面の枠内に収まるように調整</li>
+                <li>• 手ぶれを避けて安定した状態でスキャン</li>
+                <li>• 反射や影でバーコードが見えにくい場合は角度を変える</li>
+                <li>• エラーが続く場合は一度停止して再開してみる</li>
+              </ul>
             </div>
 
             <CameraScanner onResult={handleScanResult} />

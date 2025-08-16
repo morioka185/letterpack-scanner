@@ -1,10 +1,12 @@
 export const SCANNER_CONFIG = {
-  fps: 10,
-  qrbox: { width: 300, height: 200 },
-  aspectRatio: 1.5,
+  fps: 20,
+  qrbox: { width: 350, height: 250 },
+  aspectRatio: 1.4,
   disableFlip: false,
   videoConstraints: {
-    facingMode: 'environment'
+    facingMode: 'environment',
+    width: { min: 640, ideal: 1280, max: 1920 },
+    height: { min: 480, ideal: 720, max: 1080 }
   }
 } as const;
 

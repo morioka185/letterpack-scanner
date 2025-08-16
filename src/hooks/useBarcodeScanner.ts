@@ -22,6 +22,7 @@ export function useBarcodeScanner(
   const [result, setResult] = useState<BarcodeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const lastErrorTime = useRef<number | null>(null);
 
   const mergedConfig = { ...SCANNER_CONFIG, ...config };
 
@@ -50,6 +51,13 @@ export function useBarcodeScanner(
     // Suppress frequent scanning errors - only log critical ones
     if (errorMessage.includes('No MultiFormat Readers')) {
       console.warn('Scanner error:', errorMessage);
+      // Show user-friendly message occasionally
+      const now = Date.now();
+      if (!lastErrorTime.current || now - lastErrorTime.current > 5000) {
+        setError('バーコードが検出できません。バーコードを画面の中央に配置し、適切な距離を保ってください。');
+        setTimeout(() => setError(null), 3000);
+        lastErrorTime.current = now;
+      }
     }
   };
 
@@ -72,12 +80,22 @@ export function useBarcodeScanner(
           videoConstraints: mergedConfig.videoConstraints,
           formatsToSupport: [
             Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.CODABAR,
             Html5QrcodeSupportedFormats.EAN_13,
             Html5QrcodeSupportedFormats.EAN_8,
             Html5QrcodeSupportedFormats.ITF,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.CODABAR,
-          ]
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.RSS_14,
+            Html5QrcodeSupportedFormats.RSS_EXPANDED,
+          ],
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+          },
+          rememberLastUsedCamera: true,
+          showTorchButtonIfSupported: true
         },
         false
       );
