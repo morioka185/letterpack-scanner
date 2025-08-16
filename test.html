@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages テスト</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #dc2626;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .error {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+        button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #b91c1c;
+        }
+        #log {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 レターパック追跡 - テストページ</h1>
+        
+        <div class="status success">
+            <h3>✅ GitHub Pages 動作確認</h3>
+            <p>このページが表示されていれば、GitHub Pagesは正常に動作しています。</p>
+            <p><strong>現在時刻:</strong> <span id="timestamp"></span></p>
+        </div>
+
+        <div class="status">
+            <h3>🧪 機能テスト</h3>
+            <button onclick="testCamera()">カメラアクセステスト</button>
+            <button onclick="testClipboard()">クリップボードテスト</button>
+            <button onclick="testLocalStorage()">ローカルストレージテスト</button>
+            <button onclick="clearLog()">ログクリア</button>
+        </div>
+
+        <div class="status">
+            <h3>📱 ブラウザ情報</h3>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>画面サイズ:</strong> <span id="screenSize"></span></p>
+            <p><strong>HTTPS:</strong> <span id="httpsStatus"></span></p>
+        </div>
+
+        <div class="status">
+            <h3>🔗 React アプリケーション</h3>
+            <p>テストが完了したら、以下のボタンでReactアプリに移動してください：</p>
+            <button onclick="goToReactApp()">React アプリを開く</button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('ja-JP');
+        }
+
+        function updateBrowserInfo() {
+            document.getElementById('userAgent').textContent = navigator.userAgent;
+            document.getElementById('screenSize').textContent = `${window.screen.width} x ${window.screen.height}`;
+            document.getElementById('httpsStatus').textContent = location.protocol === 'https:' ? '✅ 有効' : '❌ 無効';
+        }
+
+        async function testCamera() {
+            log('カメラアクセステストを開始...');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                log('✅ カメラアクセス成功');
+                stream.getTracks().forEach(track => track.stop());
+            } catch (error) {
+                log(`❌ カメラアクセス失敗: ${error.message}`);
+            }
+        }
+
+        async function testClipboard() {
+            log('クリップボードテストを開始...');
+            try {
+                await navigator.clipboard.writeText('テストテキスト');
+                const text = await navigator.clipboard.readText();
+                log(`✅ クリップボード成功: ${text}`);
+            } catch (error) {
+                log(`❌ クリップボード失敗: ${error.message}`);
+            }
+        }
+
+        function testLocalStorage() {
+            log('ローカルストレージテストを開始...');
+            try {
+                localStorage.setItem('test', 'value');
+                const value = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                log(`✅ ローカルストレージ成功: ${value}`);
+            } catch (error) {
+                log(`❌ ローカルストレージ失敗: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function goToReactApp() {
+            window.location.href = './';
+        }
+
+        // 初期化
+        updateTimestamp();
+        updateBrowserInfo();
+        setInterval(updateTimestamp, 1000);
+        log('テストページを読み込みました');
+    </script>
+</body>
+</html>
